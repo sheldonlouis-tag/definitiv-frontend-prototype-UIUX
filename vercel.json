@@ -1,0 +1,5 @@
+﻿{
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "sveltekit",
+  "nodeVersion": "20.x"
+}

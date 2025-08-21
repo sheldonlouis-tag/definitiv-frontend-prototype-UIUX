@@ -1,24 +1,16 @@
-import type { StorybookConfig } from '@storybook/sveltekit';
+import adapter from '@sveltejs/adapter-vercel';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-const config: StorybookConfig = {
-	stories: ['../src/**/*.stories.@(js|ts|svelte)'],
-	addons: [
-		'@storybook/addon-svelte-csf',
-		'@chromatic-com/storybook',
-		'@storybook/addon-docs',
-		'@storybook/addon-a11y',
-		'@storybook/addon-vitest',
-		'@storybook/addon-themes'
-	],
-	framework: {
-		name: '@storybook/sveltekit',
-		options: {}
-	},
-	viteFinal: async (config) => {
-		if (config.define) {
-			config.define['import.meta.vitest'] = 'undefined';
-		}
-		return config;
-	}
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+    preprocess: vitePreprocess(),
+    
+    kit: {
+        adapter: adapter({
+            // Enable edge functions for better performance (optional)
+            runtime: 'nodejs20.x'
+        })
+    }
 };
+
 export default config;

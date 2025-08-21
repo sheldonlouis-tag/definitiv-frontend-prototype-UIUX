@@ -8,6 +8,9 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: { 
 		adapter: adapter({
+			// Change output directory to match Netlify expectation
+			pages: 'dist',
+			assets: 'dist',
 			// Enable SPA fallback to handle all routes
 			fallback: 'index.html',
 			// Disable strict mode to allow dynamic routes
