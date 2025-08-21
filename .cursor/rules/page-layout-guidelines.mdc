@@ -1,0 +1,363 @@
+---
+description: createing a new page
+alwaysApply: false
+---
+# Page Layout Guidelines
+
+This document outlines the standardized spacing rules and layout patterns that must be followed when creating new pages in the application.
+
+## 🎯 **Mandatory Page Structure**
+
+Every new page must follow this basic structure:
+
+```svelte
+<script lang="ts">
+  // Your imports here
+  import { PageHeader } from '$lib/components/layout/index.js';
+</script>
+
+<div class="page-container">
+  <div class="page-content">
+    <!-- Header Section -->
+    <div class="page-header">
+      <PageHeader title="Page Title" subtitle="Optional subtitle" />
+      <!-- Optional action buttons -->
+    </div>
+
+    <!-- Main Content -->
+    <!-- Your page content here -->
+  </div>
+</div>
+```
+
+## 📋 **Required Components**
+
+### 1. **PageHeader Component (MANDATORY)**
+Every page must use the `PageHeader` component for consistency:
+
+```svelte
+<!-- Basic usage -->
+<PageHeader title="Page Title" subtitle="Optional subtitle" />
+
+<!-- With breadcrumbs -->
+<PageHeader 
+  title="Page Title" 
+  subtitle="Optional subtitle"
+  breadcrumbs={[
+    { label: 'Home', href: '/app' },
+    { label: 'Section', href: '/app/section' },
+    { label: 'Current Page' }
+  ]}
+/>
+```
+
+### 2. **Page Container Classes (MANDATORY)**
+- `.page-container` - Main page wrapper
+- `.page-content` - Content wrapper with responsive padding
+
+## 🎨 **Layout Patterns**
+
+### **Single Column Layout**
+```svelte
+<div class="page-container">
+  <div class="page-content">
+    <div class="page-header">
+      <PageHeader title="Page Title" />
+    </div>
+    
+    <div class="card-container">
+      <Card class="card">
+        <CardHeader class="card-header">
+          <CardTitle>Card Title</CardTitle>
+        </CardHeader>
+        <CardContent class="card-content">
+          <!-- Content here -->
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</div>
+```
+
+### **Two Column Layout**
+```svelte
+<div class="page-container">
+  <div class="page-content">
+    <div class="page-header">
+      <PageHeader title="Page Title" />
+    </div>
+    
+    <div class="two-column-layout">
+      <!-- Main Column (2/3 width) -->
+      <div class="column-wide">
+        <div class="card-container">
+          <!-- Cards here -->
+        </div>
+      </div>
+      
+      <!-- Sidebar Column (1/3 width) -->
+      <div class="column-sidebar">
+        <div class="card-container">
+          <!-- Sidebar cards here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+### **Three Column Layout**
+```svelte
+<div class="page-container">
+  <div class="page-content">
+    <div class="page-header">
+      <PageHeader title="Page Title" />
+    </div>
+    
+    <div class="three-column-layout">
+      <div class="column-main">
+        <!-- Main content -->
+      </div>
+      <div class="column-narrow">
+        <!-- Left sidebar -->
+      </div>
+      <div class="column-sidebar">
+        <!-- Right sidebar -->
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+## 📐 **Spacing Rules Reference**
+
+### **Page Structure Classes**
+| Class | Purpose | Usage |
+|-------|---------|-------|
+| `.page-container` | Main page wrapper | Always use as outermost container |
+| `.page-content` | Content wrapper | Always use as second container |
+| `.page-header` | Header section | For pages without breadcrumbs |
+| `.page-header-with-breadcrumbs` | Header with breadcrumbs | For pages with breadcrumb navigation |
+
+### **Column Layout Classes**
+| Class | Purpose | Width |
+|-------|---------|-------|
+| `.two-column-layout` | Two-column flex layout | - |
+| `.three-column-layout` | Three-column flex layout | - |
+| `.column-main` | Flexible main column | `flex-1` |
+| `.column-wide` | Wide column | `w-2/3` |
+| `.column-sidebar` | Sidebar column | `w-1/3` |
+| `.column-narrow` | Narrow column | `w-1/4` |
+
+### **Card Spacing Classes**
+| Class | Purpose | Spacing |
+|-------|---------|---------|
+| `.card-container` | Container for cards | `space-y-4` |
+| `.card` | Individual card | `gap-2` |
+| `.card-header` | Card header | `p-0` |
+| `.card-content` | Card content | `p-0 gap-4 flex flex-col` |
+| `.card-no-padding` | Card without padding | `p-0` |
+
+### **Form Layout Classes**
+| Class | Purpose | Usage |
+|-------|---------|-------|
+| `.form-field` | Individual form field | `space-y-2` |
+| `.form-field-group` | Group of form fields | `space-y-4` |
+| `.form-grid-2` | 2-column form grid | `grid grid-cols-2 gap-4` |
+| `.form-grid-3` | 3-column form grid | `grid grid-cols-3 gap-4` |
+| `.form-row` | Horizontal form row | `flex gap-4` |
+| `.form-row-compact` | Compact form row | `flex gap-3` |
+
+### **Controls and Action Classes**
+| Class | Purpose | Usage |
+|-------|---------|-------|
+| `.controls-bar` | Controls section | `flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6` |
+| `.control-group` | Control group | `flex items-center gap-4` |
+
+## 📱 **Responsive Behavior**
+
+The spacing system automatically handles responsive behavior:
+
+- **Mobile (< 640px)**: Reduced padding, stacked columns
+- **Tablet (768px+)**: Standard padding, horizontal layouts
+- **Desktop (1024px+)**: Full padding, optimal spacing
+
+## ✅ **Checklist for New Pages**
+
+Before submitting a new page, ensure:
+
+- [ ] Uses `.page-container` and `.page-content` classes
+- [ ] Includes `PageHeader` component with appropriate title
+- [ ] Uses appropriate column layout classes if needed
+- [ ] Applies `.card-container` and `.card` classes for content sections
+- [ ] Uses `.form-field` and related classes for forms
+- [ ] Implements responsive design considerations
+- [ ] Follows the spacing scale consistently
+
+## 🚫 **Common Mistakes to Avoid**
+
+1. **Don't use custom padding/margin classes** - Use the predefined spacing classes
+2. **Don't skip the PageHeader component** - It's mandatory for consistency
+3. **Don't use inline styles for spacing** - Use the CSS classes
+4. **Don't create custom layout containers** - Use the existing column classes
+5. **Don't forget responsive considerations** - The classes handle this automatically
+
+## 📝 **Example: Complete Page Template**
+
+```svelte
+<script lang="ts">
+  import { PageHeader } from '$lib/components/layout/index.js';
+  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import { Label } from '$lib/components/ui/label/index.js';
+</script>
+
+<div class="page-container">
+  <div class="page-content">
+    <!-- Header -->
+    <div class="page-header">
+      <PageHeader 
+        title="New Page" 
+        subtitle="Page description"
+        breadcrumbs={[
+          { label: 'App', href: '/app' },
+          { label: 'Section', href: '/app/section' },
+          { label: 'New Page' }
+        ]}
+      />
+      <Button>Action Button</Button>
+    </div>
+
+    <!-- Controls Bar (if needed) -->
+    <div class="controls-bar">
+      <div class="control-group">
+        <!-- Controls here -->
+      </div>
+      <div class="relative w-full sm:w-64">
+        <!-- Search or other controls -->
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="card-container">
+      <Card class="card">
+        <CardHeader class="card-header">
+          <CardTitle>Main Content</CardTitle>
+        </CardHeader>
+        <CardContent class="card-content">
+          <div class="form-field-group">
+            <div class="form-field">
+              <Label for="example">Example Field</Label>
+              <Input id="example" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</div>
+```
+
+## 🔧 **Customization Guidelines**
+
+If you need to customize spacing:
+
+1. **First, check if an existing class meets your needs**
+2. **Use the spacing scale utilities** (`.spacing-sm`, `.spacing-md`, etc.)
+3. **Create new classes only if absolutely necessary**
+4. **Document any new spacing patterns** in this guide
+
+## 📚 **Additional Resources**
+
+- CSS file: `src/app.css` (spacing rules in `@layer components`)
+- PageHeader component: `$lib/components/layout/index.js`
+- UI components: `$lib/components/ui/`
+
+---
+
+**Remember**: Consistency in spacing and layout is crucial for maintaining a professional user experience. Always follow these guidelines when creating new pages.
+
+## 🚀 **Quick Start Template**
+
+For immediate use, copy this template:
+
+```svelte
+<script lang="ts">
+  import { PageHeader } from '$lib/components/layout/index.js';
+  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
+  import { Button } from '$lib/components/ui/button/index.js';
+</script>
+
+<div class="page-container">
+  <div class="page-content">
+    <div class="page-header">
+      <PageHeader title="Your Page Title" subtitle="Optional subtitle" />
+      <Button>Action</Button>
+    </div>
+    
+    <div class="card-container">
+      <Card class="card">
+        <CardHeader class="card-header">
+          <CardTitle>Content Title</CardTitle>
+        </CardHeader>
+        <CardContent class="card-content">
+          <!-- Your content here -->
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</div>
+```
+
+## 📋 **Real Examples from Codebase**
+
+### **Employees List Page**
+```svelte
+<div class="page-container">
+  <div class="page-content">
+    <div class="page-header">
+      <PageHeader title="My Team" subtitle="Employees" />
+      <Button>Add Employee</Button>
+    </div>
+    
+    <div class="controls-bar">
+      <!-- Controls here -->
+    </div>
+    
+    <div class="card-container">
+      <Card class="card-no-padding">
+        <!-- Table content -->
+      </Card>
+    </div>
+  </div>
+</div>
+```
+
+### **Employee Detail Page**
+```svelte
+<div class="page-container">
+  <div class="page-content">
+    <div class="page-header-with-breadcrumbs">
+      <PageHeader 
+        title="Employee Details" 
+        subtitle="Employee Name"
+        breadcrumbs={[...]}
+      />
+    </div>
+    
+    <div class="two-column-layout">
+      <div class="column-wide">
+        <div class="card-container">
+          <!-- Main content cards -->
+        </div>
+      </div>
+      <div class="column-sidebar">
+        <div class="card-container">
+          <!-- Sidebar cards -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```

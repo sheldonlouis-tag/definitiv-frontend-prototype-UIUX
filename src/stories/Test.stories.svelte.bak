@@ -1,0 +1,15 @@
+<script module lang="ts">
+	import { defineMeta } from '@storybook/addon-svelte-csf';
+	
+	const { Story } = defineMeta({
+		title: 'Test/Simple',
+		component: 'div'
+	});
+</script>
+
+<Story name="Basic Test">
+	<div class="p-4">
+		<h1>Basic Test</h1>
+		<p>If you can see this, Storybook is working!</p>
+	</div>
+</Story>

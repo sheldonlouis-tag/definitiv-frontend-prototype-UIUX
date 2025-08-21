@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1088444">
+    <PropertyGroup>
+        <Company>Definitiv International Pty Ltd</Company>
+        <Product>Definitiv.FrontEnd.UIComponents</Product>
+        <Copyright>Copyright © Access Definitiv 2025</Copyright>
+
+        <BuildOutputFolder>$(MSBuildProjectDirectory)\wwwroot</BuildOutputFolder>
+        <StartupCommand>npm run dev</StartupCommand>
+    </PropertyGroup>
+    <ItemGroup>
+      <Folder Include="src\stories\" />
+    </ItemGroup>
+
+    <Target Name="_Clean" BeforeTargets="Clean">
+        <RemoveDir Directories="$(BuildOutputFolder); .svelte-kit; node_modules" />
+        <Delete Files="vite.config.*.timestamp-*" />
+    </Target>
+</Project>

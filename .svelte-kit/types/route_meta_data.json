@@ -1,0 +1,44 @@
+{
+	"/(auth)": [
+		"src/routes/(auth)/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/": [
+		"src/routes/+page.ts",
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/details": [
+		"src/routes/+layout.ts"
+	],
+	"/employee/employee/my-details": [
+		"src/routes/+layout.ts"
+	],
+	"/employee/finance": [
+		"src/routes/+layout.ts"
+	],
+	"/employee/finance/banking": [
+		"src/routes/+layout.ts"
+	],
+	"/my-team/employees": [
+		"src/routes/my-team/employees/+page.ts",
+		"src/routes/+layout.ts"
+	],
+	"/my-team/employees/[id]": [
+		"src/routes/my-team/employees/[id]/+page.ts",
+		"src/routes/+layout.ts"
+	],
+	"/my-team/onboarding": [
+		"src/routes/my-team/onboarding/+page.ts",
+		"src/routes/+layout.ts"
+	],
+	"/my-team/timesheets": [
+		"src/routes/my-team/timesheets/+page.ts",
+		"src/routes/+layout.ts"
+	],
+	"/(auth)/signin": [
+		"src/routes/(auth)/signin/+page.ts",
+		"src/routes/(auth)/+layout.ts",
+		"src/routes/+layout.ts"
+	]
+}

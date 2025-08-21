@@ -1,0 +1,190 @@
+import type { Meta, StoryObj } from '@storybook/svelte';
+import LeftNavigationExample from '../lib/components/ui/left-navigation/left-navigation-example.svelte';
+import type { LeftNavigationData } from '../lib/components/ui/left-navigation/index.js';
+
+// Import icons
+import HomeIcon from '@lucide/svelte/icons/home';
+import FolderIcon from '@lucide/svelte/icons/folder';
+import FileTextIcon from '@lucide/svelte/icons/file-text';
+import SettingsIcon from '@lucide/svelte/icons/settings';
+import UsersIcon from '@lucide/svelte/icons/users';
+import DatabaseIcon from '@lucide/svelte/icons/database';
+import BarChartIcon from '@lucide/svelte/icons/bar-chart-3';
+import ShieldIcon from '@lucide/svelte/icons/shield';
+
+const meta: Meta<LeftNavigationExample> = {
+	title: 'Components/LeftNavigation',
+	component: LeftNavigationExample,
+	parameters: {
+		layout: 'fullscreen',
+	},
+	argTypes: {
+		activeItemId: {
+			control: 'text',
+			description: 'The ID of the currently active navigation item'
+		}
+	}
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const mockNavigationData: LeftNavigationData[] = [
+	{
+		id: 'main-section',
+		label: 'Main Navigation',
+		children: [
+			{
+				id: 'dashboard',
+				label: 'Dashboard',
+				href: '/dashboard',
+				icon: HomeIcon,
+				active: true
+			},
+			{
+				id: 'projects',
+				label: 'Projects',
+				href: '/projects',
+				icon: FolderIcon,
+				children: [
+					{
+						id: 'active-projects',
+						label: 'Active Projects',
+						href: '/projects/active',
+						children: [
+							{
+								id: 'project-alpha',
+								label: 'Project Alpha',
+								href: '/projects/active/alpha'
+							},
+							{
+								id: 'project-beta',
+								label: 'Project Beta',
+								href: '/projects/active/beta'
+							}
+						]
+					},
+					{
+						id: 'archived-projects',
+						label: 'Archived Projects',
+						href: '/projects/archived'
+					},
+					{
+						id: 'templates',
+						label: 'Templates',
+						href: '/projects/templates'
+					}
+				]
+			},
+			{
+				id: 'documents',
+				label: 'Documents',
+				href: '/documents',
+				icon: FileTextIcon,
+				children: [
+					{
+						id: 'recent-docs',
+						label: 'Recent Documents',
+						href: '/documents/recent'
+					},
+					{
+						id: 'shared-docs',
+						label: 'Shared Documents',
+						href: '/documents/shared'
+					}
+				]
+			},
+			{
+				id: 'analytics',
+				label: 'Analytics',
+				href: '/analytics',
+				icon: BarChartIcon
+			}
+		]
+	},
+	{
+		id: 'admin-section',
+		label: 'Administration',
+		children: [
+			{
+				id: 'users',
+				label: 'User Management',
+				href: '/admin/users',
+				icon: UsersIcon,
+				children: [
+					{
+						id: 'active-users',
+						label: 'Active Users',
+						href: '/admin/users/active'
+					},
+					{
+						id: 'pending-users',
+						label: 'Pending Approval',
+						href: '/admin/users/pending'
+					},
+					{
+						id: 'user-roles',
+						label: 'Roles & Permissions',
+						href: '/admin/users/roles'
+					}
+				]
+			},
+			{
+				id: 'database',
+				label: 'Database',
+				href: '/admin/database',
+				icon: DatabaseIcon
+			},
+			{
+				id: 'security',
+				label: 'Security Settings',
+				href: '/admin/security',
+				icon: ShieldIcon
+			},
+			{
+				id: 'settings',
+				label: 'System Settings',
+				href: '/admin/settings',
+				icon: SettingsIcon,
+				children: [
+					{
+						id: 'general-settings',
+						label: 'General',
+						href: '/admin/settings/general'
+					},
+					{
+						id: 'email-settings',
+						label: 'Email Configuration',
+						href: '/admin/settings/email'
+					},
+					{
+						id: 'backup-settings',
+						label: 'Backup & Recovery',
+						href: '/admin/settings/backup'
+					}
+				]
+			}
+		]
+	}
+];
+
+export const Default: Story = {
+	args: {
+		navigationData: mockNavigationData,
+		activeItemId: 'dashboard'
+	}
+};
+
+export const ExpandedSections: Story = {
+	args: {
+		navigationData: mockNavigationData,
+		activeItemId: 'project-alpha'
+	}
+};
+
+export const AdminFocused: Story = {
+	args: {
+		navigationData: mockNavigationData,
+		activeItemId: 'pending-users'
+	}
+};
