@@ -7,7 +7,7 @@
 <div class="flex flex-col items-center justify-center min-h-screen">
 	<div class="text-center max-w-2xl mx-auto p-8">
 		<h1 class="text-3xl font-bold mb-6 text-gray-900">
-			Welcome to Employee Hub
+			Welcome to Access Definitiv by EVODS
 		</h1>
 		
 		{#if user}

@@ -8,16 +8,52 @@
 		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
+	"/employee": [
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/cost-centers": [
+		"src/routes/employee/cost-centers/+page.ts",
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/cost-centers/projects": [
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
 	"/employee/details": [
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/employee": [
+		"src/routes/employee/employee/+page.ts",
+		"src/routes/employee/+layout.ts",
 		"src/routes/+layout.ts"
 	],
 	"/employee/employee/my-details": [
+		"src/routes/employee/+layout.ts",
 		"src/routes/+layout.ts"
 	],
 	"/employee/finance": [
+		"src/routes/employee/+layout.ts",
 		"src/routes/+layout.ts"
 	],
 	"/employee/finance/banking": [
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/financial": [
+		"src/routes/employee/financial/+page.ts",
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/financial/bank-accounts": [
+		"src/routes/employee/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/employee/leave": [
+		"src/routes/employee/leave/+page.ts",
+		"src/routes/employee/+layout.ts",
 		"src/routes/+layout.ts"
 	],
 	"/my-team/employees": [

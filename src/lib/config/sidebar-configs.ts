@@ -50,6 +50,70 @@ import CheckCircleIcon from '@lucide/svelte/icons/check-circle';
 import ClipboardListIcon from '@lucide/svelte/icons/clipboard-list';
 import ShieldAlertIcon from '@lucide/svelte/icons/shield-alert';
 import ClockIcon2 from '@lucide/svelte/icons/clock-2';
+import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+import DatabaseIcon from '@lucide/svelte/icons/database';
+import ClockIcon3 from '@lucide/svelte/icons/clock-3';
+import BriefcaseWorkIcon from '@lucide/svelte/icons/briefcase';
+import ScrollIcon from '@lucide/svelte/icons/scroll';
+
+/**
+ * Level 3 navigation data for Reporting section
+ */
+export const reportingLevel3Menu = {
+	employeeReporting: [
+		{ label: 'Employee Listing', icon: UsersIcon, href: '/reporting/employee-reporting/employee-listing' },
+		{ label: 'Employee Role Assignments', icon: UserCogIcon, href: '/reporting/employee-reporting/role-assignments' },
+		{ label: 'Compliance Records', icon: ShieldCheckIcon, href: '/reporting/employee-reporting/compliance-records' },
+		{ label: 'Tax Declarations', icon: CalculatorIcon, href: '/reporting/employee-reporting/tax-declarations' },
+		{ label: 'Additions & Deductions', icon: PlusCircleIcon, href: '/reporting/employee-reporting/additions-deductions' },
+		{ label: 'Pay Policies', icon: ScrollTextIcon, href: '/reporting/employee-reporting/pay-policies' },
+		{ label: 'Superannuation', icon: PiggyBankIcon, href: '/reporting/employee-reporting/superannuation' },
+		{ label: 'Emergency Contacts', icon: UserCheckIcon, href: '/reporting/employee-reporting/emergency-contacts' },
+		{ label: 'Documents', icon: FileIcon, href: '/reporting/employee-reporting/documents' },
+		{ label: 'Compliance Requirements', icon: ShieldAlertIcon, href: '/reporting/employee-reporting/compliance-requirements' },
+		{ label: 'Work Restrictions Policies', icon: ShieldIcon, href: '/reporting/employee-reporting/work-restrictions-policies' },
+		{ label: 'Cost Splitting', icon: CoinsIcon, href: '/reporting/employee-reporting/cost-splitting' },
+		{ label: 'Asset Assignment', icon: WrenchIcon, href: '/reporting/employee-reporting/asset-assignment' },
+		{ label: 'Pay Methods Summary', icon: CreditCardIcon, href: '/reporting/employee-reporting/pay-methods-summary' },
+		{ label: 'Entitlements', icon: GiftIcon, href: '/reporting/employee-reporting/entitlements' },
+		{ label: 'General Ledger', icon: FileSpreadsheetIcon, href: '/reporting/employee-reporting/general-ledger' },
+		{ label: 'Audit Summary', icon: ClipboardListIcon, href: '/reporting/employee-reporting/audit-summary' },
+		{ label: 'Roster by Employee', icon: CalendarIcon, href: '/reporting/employee-reporting/roster-by-employee' },
+		{ label: 'Roster by Role', icon: BriefcaseIcon, href: '/reporting/employee-reporting/roster-by-role' }
+	],
+	payrollReporting: [
+		{ label: 'Payroll Summary', icon: BarChart3Icon, href: '/reporting/payroll-reporting/summary' },
+		{ label: 'Payroll Details', icon: FileTextIcon, href: '/reporting/payroll-reporting/details' }
+	],
+	leaveReporting: [
+		{ label: 'Leave Summary', icon: BarChart3Icon, href: '/reporting/leave-reporting/summary' },
+		{ label: 'Leave Details', icon: FileTextIcon, href: '/reporting/leave-reporting/details' }
+	],
+	accrualReporting: [
+		{ label: 'Accrual Summary', icon: BarChart3Icon, href: '/reporting/accrual-reporting/summary' },
+		{ label: 'Accrual Details', icon: FileTextIcon, href: '/reporting/accrual-reporting/details' }
+	],
+	timeAttendanceReporting: [
+		{ label: 'Attendance Summary', icon: BarChart3Icon, href: '/reporting/time-attendance-reporting/summary' },
+		{ label: 'Attendance Details', icon: FileTextIcon, href: '/reporting/time-attendance-reporting/details' }
+	],
+	timeClockReporting: [
+		{ label: 'TimeClock Summary', icon: BarChart3Icon, href: '/reporting/timeclock-reporting/summary' },
+		{ label: 'TimeClock Details', icon: FileTextIcon, href: '/reporting/timeclock-reporting/details' }
+	],
+	rosteringReporting: [
+		{ label: 'Rostering Summary', icon: BarChart3Icon, href: '/reporting/rostering-reporting/summary' },
+		{ label: 'Rostering Details', icon: FileTextIcon, href: '/reporting/rostering-reporting/details' }
+	],
+	companyReporting: [
+		{ label: 'Company Summary', icon: BarChart3Icon, href: '/reporting/company-reporting/summary' },
+		{ label: 'Company Details', icon: FileTextIcon, href: '/reporting/company-reporting/details' }
+	],
+	pdfReporting: [
+		{ label: 'Generate PDF Reports', icon: FileSpreadsheetIcon, href: '/reporting/pdf-reporting/generate' },
+		{ label: 'PDF Templates', icon: FileTextIcon, href: '/reporting/pdf-reporting/templates' }
+	]
+};
 
 /**
  * Level 3 navigation data for Employee section
@@ -102,6 +166,16 @@ export const financialLevel3Menu = [
 ];
 
 /**
+ * Level 3 navigation data for Admin Cost Centers section
+ */
+export const adminCostCentersLevel3Menu = [
+	{ label: 'Projects', icon: FolderTreeIcon, href: '/admin/cost-centers/projects' },
+	{ label: 'Roles', icon: UserCog2Icon, href: '/admin/cost-centers/roles' },
+	{ label: 'Locations', icon: MapPinIcon, href: '/admin/cost-centers/locations' },
+	{ label: 'Departments', icon: BuildingIcon, href: '/admin/cost-centers/departments' }
+];
+
+/**
  * Level 3 navigation data for Cost Centers section
  */
 export const costCentersLevel3Menu = [
@@ -150,6 +224,25 @@ export const sidebarConfig: SidebarConfig = {
 					{ label: 'Cost Centers', href: '/employee/cost-centers', hasLevel3: true },
 					{ label: 'Financial', href: '/employee/financial', hasLevel3: true },
 					{ label: 'Leave', href: '/employee/leave', hasLevel3: true }
+				]
+			},
+			{
+				label: 'Admin',
+				icon: SettingsIcon2,
+				tooltipContent: 'Administration',
+				subItems: [
+					{ 
+						label: 'Cost Centers', 
+						href: '/admin/cost-centers',
+						hasLevel3: true
+					},
+					{ label: 'Organisation', href: '/admin/organisation' },
+					{ label: 'Data Import/Export', href: '/admin/data-import-export' },
+					{ label: 'Time & Attendance', href: '/admin/time-attendance' },
+					{ label: 'Payroll', href: '/admin/payroll' },
+					{ label: 'Employment', href: '/admin/employment' },
+					{ label: 'Policies', href: '/admin/policies' },
+					{ label: 'Announcements', href: '/admin/announcements' }
 				]
 			},
 			{
@@ -258,9 +351,15 @@ export const sidebarConfig: SidebarConfig = {
 				icon: TrendingUpIcon,
 				tooltipContent: 'Reports and Analytics',
 				subItems: [
-					{ label: 'Analytics', href: '/reporting/analytics' },
-					{ label: 'Custom Reports', href: '/reporting/custom' },
-					{ label: 'Exports', href: '/reporting/exports' }
+					{ label: 'Employee Reporting', href: '/reporting/employee-reporting', hasLevel3: true },
+					{ label: 'Payroll Reporting', href: '/reporting/payroll-reporting', hasLevel3: true },
+					{ label: 'Leave Reporting', href: '/reporting/leave-reporting', hasLevel3: true },
+					{ label: 'Accrual Reporting', href: '/reporting/accrual-reporting', hasLevel3: true },
+					{ label: 'Time Attendance Reporting', href: '/reporting/time-attendance-reporting', hasLevel3: true },
+					{ label: 'TimeClock Reporting', href: '/reporting/timeclock-reporting', hasLevel3: true },
+					{ label: 'Rostering Reporting', href: '/reporting/rostering-reporting', hasLevel3: true },
+					{ label: 'Company Reporting', href: '/reporting/company-reporting', hasLevel3: true },
+					{ label: 'PDF Reporting', href: '/reporting/pdf-reporting', hasLevel3: true }
 				]
 			},
 			{

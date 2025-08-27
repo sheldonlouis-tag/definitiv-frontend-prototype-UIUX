@@ -4,15 +4,22 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { Input } from '$lib/components/ui/input/index.js';
-	import { settingsContextMenu, employeeLevel3Menu, costCentersLevel3Menu, financialLevel3Menu, leaveLevel3Menu } from '$lib/config/sidebar-configs.js';
+	import { OrganizationSwitcher, type Organization } from '$lib/components/ui/organization-switcher/index.js';
+	import { settingsContextMenu, employeeLevel3Menu, costCentersLevel3Menu, financialLevel3Menu, leaveLevel3Menu, reportingLevel3Menu, adminCostCentersLevel3Menu } from '$lib/config/sidebar-configs.js';
 	import { cn } from '$lib/utils.js';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
-import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
-import SearchIcon from '@lucide/svelte/icons/search';
-import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { writable } from 'svelte/store';
+	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
+	import SearchIcon from '@lucide/svelte/icons/search';
+	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import UserIcon from '@lucide/svelte/icons/user';
+	import BuildingIcon from '@lucide/svelte/icons/building';
+	import DollarSignIcon from '@lucide/svelte/icons/dollar-sign';
+	import CalendarIcon from '@lucide/svelte/icons/calendar';
+	import TrendingUpIcon from '@lucide/svelte/icons/trending-up';
+	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		config: SidebarConfig;
@@ -48,9 +55,7 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 		if (currentPath === itemPath) return true;
 		
 		// Check if current path starts with item path (for nested routes)
-		// This handles cases like /my-team/123 when item.href is /my-team
 		if (itemPath !== '/' && currentPath.startsWith(itemPath)) {
-			// Make sure it's not a partial match (e.g., /my-team shouldn't match /my-team-settings)
 			const nextChar = currentPath.charAt(itemPath.length);
 			return nextChar === '' || nextChar === '/';
 		}
@@ -68,14 +73,26 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 	// State for settings context menu
 	let showSettingsMenu = $state(false);
 
-	// State for level 3 navigation
-	let level3Navigation = $state<{show: boolean, title: string, breadcrumb: string, items: any[]} | null>(null);
+	// Store-based Level 3 navigation state
+	const level3Store = writable({
+		active: false,
+		title: '',
+		breadcrumb: '',
+		items: [],
+		counter: 0
+	});
+
+	// Reactive variables from store
+	let isLevel3Active = $derived($level3Store.active);
+	let level3Title = $derived($level3Store.title);
+	let level3Breadcrumb = $derived($level3Store.breadcrumb);
+	let level3Items = $derived($level3Store.items);
 
 	// Function to toggle search bar
 	function toggleSearchBar() {
 		showSearchBar = !showSearchBar;
 		if (!showSearchBar) {
-			searchQuery = ''; // Clear search when hiding
+			searchQuery = '';
 		}
 	}
 
@@ -83,10 +100,8 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 	function shouldExpandByDefault(item: any): boolean {
 		if (!item.subItems) return false;
 		
-		// Expand if this item is active
 		if (isMenuItemActive(item)) return true;
 		
-		// Expand if any sub-item is active based on URL
 		return item.subItems.some((subItem: any) => isSubMenuItemActive(subItem));
 	}
 
@@ -95,7 +110,7 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 		const newExpandedItems = new Set<string>();
 		
 		config.content?.items.forEach((item: any) => {
-			if (shouldExpandByDefault(item)) {
+			if (item.label === 'Employee Hub' || shouldExpandByDefault(item)) {
 				newExpandedItems.add(item.label);
 			}
 		});
@@ -110,31 +125,42 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 		} else {
 			expandedItems.add(itemLabel);
 		}
-		expandedItems = new Set(expandedItems); // Trigger reactivity
-	}
-
-	// Function to check if we're currently in a Level 3 view
-	function isInLevel3View(): boolean {
-		const currentPath = $page.url.pathname;
-		// Check if current path matches any Level 3 routes
-		return currentPath.includes('/employee/employee/') || 
-		       currentPath.includes('/employee/cost-centers/') || 
-		       currentPath.includes('/employee/financial/') || 
-		       currentPath.includes('/employee/leave/');
+		expandedItems = new Set(expandedItems);
 	}
 
 	// Function to get the Level 3 context from current URL
 	function getLevel3Context(): {parentLabel: string, itemLabel: string} | null {
 		const currentPath = $page.url.pathname;
+		const cleanPath = currentPath.replace(/\/$/, '');
 		
-		if (currentPath.includes('/employee/employee/')) {
+		if (cleanPath === '/employee/employee' || cleanPath.startsWith('/employee/employee/')) {
 			return { parentLabel: 'Employee Hub', itemLabel: 'Employee' };
-		} else if (currentPath.includes('/employee/cost-centers/')) {
+		} else if (cleanPath === '/employee/cost-centers' || cleanPath.startsWith('/employee/cost-centers/')) {
 			return { parentLabel: 'Employee Hub', itemLabel: 'Cost Centers' };
-		} else if (currentPath.includes('/employee/financial/')) {
+		} else if (cleanPath === '/employee/financial' || cleanPath.startsWith('/employee/financial/')) {
 			return { parentLabel: 'Employee Hub', itemLabel: 'Financial' };
-		} else if (currentPath.includes('/employee/leave/')) {
+		} else if (cleanPath === '/employee/leave' || cleanPath.startsWith('/employee/leave/')) {
 			return { parentLabel: 'Employee Hub', itemLabel: 'Leave' };
+		} else if (cleanPath === '/admin/cost-centers' || cleanPath.startsWith('/admin/cost-centers/')) {
+			return { parentLabel: 'Admin', itemLabel: 'Cost Centers' };
+		} else if (cleanPath === '/reporting/employee-reporting' || cleanPath.startsWith('/reporting/employee-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Employee Reporting' };
+		} else if (cleanPath === '/reporting/payroll-reporting' || cleanPath.startsWith('/reporting/payroll-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Payroll Reporting' };
+		} else if (cleanPath === '/reporting/leave-reporting' || cleanPath.startsWith('/reporting/leave-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Leave Reporting' };
+		} else if (cleanPath === '/reporting/accrual-reporting' || cleanPath.startsWith('/reporting/accrual-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Accrual Reporting' };
+		} else if (cleanPath === '/reporting/time-attendance-reporting' || cleanPath.startsWith('/reporting/time-attendance-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Time Attendance Reporting' };
+		} else if (cleanPath === '/reporting/timeclock-reporting' || cleanPath.startsWith('/reporting/timeclock-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'TimeClock Reporting' };
+		} else if (cleanPath === '/reporting/rostering-reporting' || cleanPath.startsWith('/reporting/rostering-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Rostering Reporting' };
+		} else if (cleanPath === '/reporting/company-reporting' || cleanPath.startsWith('/reporting/company-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'Company Reporting' };
+		} else if (cleanPath === '/reporting/pdf-reporting' || cleanPath.startsWith('/reporting/pdf-reporting/')) {
+			return { parentLabel: 'Reporting', itemLabel: 'PDF Reporting' };
 		}
 		
 		return null;
@@ -145,28 +171,36 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 		if (!subItem.href) return false;
 		
 		const currentPath = $page.url.pathname;
-		return currentPath === subItem.href;
+		return currentPath === subItem.href || currentPath.startsWith(subItem.href + '/');
 	}
 
-	// Initialize Level 3 view if we're on a Level 3 page
+	// Initialize Level 3 view based on URL
 	$effect(() => {
 		const level3Context = getLevel3Context();
-		if (level3Context && !level3Navigation?.show) {
+		const currentState = $level3Store;
+		
+		if (level3Context && !currentState.active) {
 			showLevel3(level3Context.parentLabel, level3Context.itemLabel);
-		} else if (!level3Context && level3Navigation?.show) {
-			// We navigated away from Level 3, hide it
-			hideLevel3();
+		} else if (!level3Context && currentState.active) {
+			level3Store.set({
+				active: false,
+				title: '',
+				breadcrumb: '',
+				items: [],
+				counter: 0
+			});
 		}
 	});
 
 	// Function to handle menu item clicks
 	async function handleMenuClick(item: any) {
 		if (item.hasContextMenu) {
-			// Toggle context menu for items like Settings
 			showSettingsMenu = !showSettingsMenu;
 		} else if (item.subItems && item.subItems.length > 0) {
-			// If item has sub-items, toggle expansion instead of navigating
 			toggleExpansion(item.label);
+			if (item.href) {
+				await goto(item.href);
+			}
 		} else if (item.href) {
 			await goto(item.href);
 		} else if (item.onclick) {
@@ -176,7 +210,7 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 
 	// Function to handle context menu item clicks
 	async function handleContextMenuClick(contextItem: any) {
-		showSettingsMenu = false; // Close context menu
+		showSettingsMenu = false;
 		if (contextItem.href) {
 			await goto(contextItem.href);
 		} else if (contextItem.onclick) {
@@ -186,36 +220,105 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 
 	// Function to show Level 3 navigation
 	function showLevel3(parentLabel: string, itemLabel: string) {
-		// Determine which Level 3 menu to show based on the item
-		let level3Items;
+		let menuItems;
+		let parentItem;
+		
 		switch (itemLabel) {
 			case 'Employee':
-				level3Items = employeeLevel3Menu;
+				menuItems = employeeLevel3Menu;
+				parentItem = { label: 'Employee', href: '/employee/employee', icon: UserIcon };
 				break;
 			case 'Cost Centers':
-				level3Items = costCentersLevel3Menu;
+				// Check if this is Employee Hub Cost Centers or Admin Cost Centers based on parent
+				if (parentLabel === 'Admin') {
+					menuItems = adminCostCentersLevel3Menu;
+					parentItem = { label: 'Cost Centers', href: '/admin/cost-centers', icon: BuildingIcon };
+				} else {
+					menuItems = costCentersLevel3Menu;
+					parentItem = { label: 'Cost Centers', href: '/employee/cost-centers', icon: BuildingIcon };
+				}
 				break;
 			case 'Financial':
-				level3Items = financialLevel3Menu;
+				menuItems = financialLevel3Menu;
+				parentItem = { label: 'Financial', href: '/employee/financial', icon: DollarSignIcon };
 				break;
 			case 'Leave':
-				level3Items = leaveLevel3Menu;
+				menuItems = leaveLevel3Menu;
+				parentItem = { label: 'Leave', href: '/employee/leave', icon: CalendarIcon };
+				break;
+			case 'Employee Reporting':
+				menuItems = reportingLevel3Menu.employeeReporting;
+				parentItem = { label: 'Employee Reporting', href: '/reporting/employee-reporting', icon: TrendingUpIcon };
+				break;
+			case 'Payroll Reporting':
+				menuItems = reportingLevel3Menu.payrollReporting;
+				parentItem = { label: 'Payroll Reporting', href: '/reporting/payroll-reporting', icon: TrendingUpIcon };
+				break;
+			case 'Leave Reporting':
+				menuItems = reportingLevel3Menu.leaveReporting;
+				parentItem = { label: 'Leave Reporting', href: '/reporting/leave-reporting', icon: TrendingUpIcon };
+				break;
+			case 'Accrual Reporting':
+				menuItems = reportingLevel3Menu.accrualReporting;
+				parentItem = { label: 'Accrual Reporting', href: '/reporting/accrual-reporting', icon: TrendingUpIcon };
+				break;
+			case 'Time Attendance Reporting':
+				menuItems = reportingLevel3Menu.timeAttendanceReporting;
+				parentItem = { label: 'Time Attendance Reporting', href: '/reporting/time-attendance-reporting', icon: TrendingUpIcon };
+				break;
+			case 'TimeClock Reporting':
+				menuItems = reportingLevel3Menu.timeClockReporting;
+				parentItem = { label: 'TimeClock Reporting', href: '/reporting/timeclock-reporting', icon: TrendingUpIcon };
+				break;
+			case 'Rostering Reporting':
+				menuItems = reportingLevel3Menu.rosteringReporting;
+				parentItem = { label: 'Rostering Reporting', href: '/reporting/rostering-reporting', icon: TrendingUpIcon };
+				break;
+			case 'Company Reporting':
+				menuItems = reportingLevel3Menu.companyReporting;
+				parentItem = { label: 'Company Reporting', href: '/reporting/company-reporting', icon: TrendingUpIcon };
+				break;
+			case 'PDF Reporting':
+				menuItems = reportingLevel3Menu.pdfReporting;
+				parentItem = { label: 'PDF Reporting', href: '/reporting/pdf-reporting', icon: TrendingUpIcon };
 				break;
 			default:
-				level3Items = employeeLevel3Menu; // Fallback
+				menuItems = employeeLevel3Menu;
+				parentItem = { label: 'Employee', href: '/employee/employee', icon: UserIcon };
 		}
 
-		level3Navigation = {
-			show: true,
+		level3Store.set({
+			active: true,
 			title: itemLabel,
-			breadcrumb: `${parentLabel} / ${itemLabel}`,
-			items: level3Items
-		};
+			breadcrumb: parentLabel,
+			items: [parentItem, ...menuItems],
+			counter: Date.now()
+		});
 	}
 
-	// Function to hide Level 3 navigation (go back)
-	function hideLevel3() {
-		level3Navigation = null;
+	// Function to hide Level 3 navigation
+	async function hideLevel3() {
+		level3Store.set({
+			active: false,
+			title: '',
+			breadcrumb: '',
+			items: [],
+			counter: 0
+		});
+		await goto('/');
+	}
+
+	// Function to handle sub-menu item clicks  
+	async function handleSubMenuClick(subItem: any, parentItem: any) {
+		if (subItem.hasLevel3) {
+			showLevel3(parentItem.label, subItem.label);
+		}
+		
+		if (subItem.href) {
+			await goto(subItem.href);
+		} else if (subItem.onclick) {
+			subItem.onclick();
+		}
 	}
 
 	// Function to handle Level 3 menu clicks
@@ -237,18 +340,6 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 		}
 	}
 
-	// Function to handle sub-menu item clicks  
-	async function handleSubMenuClick(subItem: any, parentItem: any) {
-		if (subItem.hasLevel3) {
-			// Show Level 3 navigation instead of navigating
-			showLevel3(parentItem.label, subItem.label);
-		} else if (subItem.href) {
-			await goto(subItem.href);
-		} else if (subItem.onclick) {
-			subItem.onclick();
-		}
-	}
-
 	// Function to render a menu section
 	function renderMenuSection(section: any) {
 		return section?.items || [];
@@ -256,12 +347,10 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 
 	// Function to get the active menu item label for page title
 	function getActiveMenuItemLabel(): string | undefined {
-		// Check content section first
 		for (const item of config.content?.items || []) {
 			if (isMenuItemActive(item)) {
 				return item.label;
 			}
-			// Check sub-items
 			for (const subItem of item.subItems || []) {
 				if (isSubMenuItemActive(subItem)) {
 					return `${item.label} - ${subItem.label}`;
@@ -269,12 +358,10 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 			}
 		}
 		
-		// Check header section
 		for (const item of config.header?.items || []) {
 			if (isMenuItemActive(item)) {
 				return item.label;
 			}
-			// Check sub-items
 			for (const subItem of item.subItems || []) {
 				if (isSubMenuItemActive(subItem)) {
 					return `${item.label} - ${subItem.label}`;
@@ -282,7 +369,6 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 			}
 		}
 		
-		// Check footer section
 		for (const item of config.footer?.items || []) {
 			if (isMenuItemActive(item)) {
 				return item.label;
@@ -294,6 +380,13 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 
 	// Get the page title - use provided title or fall back to active menu item
 	const effectivePageTitle = $derived(pageTitle || getActiveMenuItemLabel());
+
+	// Handle keyboard shortcuts
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && $level3Store.active) {
+			hideLevel3();
+		}
+	}
 </script>
 
 <svelte:head>
@@ -302,27 +395,22 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 	{/if}
 </svelte:head>
 
-<svelte:window onclick={handleClickOutside} />
+<svelte:window onclick={handleClickOutside} onkeydown={handleKeydown} />
 
 <div class={cn('flex p-2 gap-2', className)} {...restProps}>
-	{#if level3Navigation?.show}
+	{#if isLevel3Active}
 		<!-- Level 3 Navigation Sidebar -->
 		<Sidebar.Provider bind:open>
 			<Sidebar.Root {variant} {side} {collapsible}>
 				<!-- Level 3 Header -->
 				<Sidebar.Header>
-					<!-- Level 3 Header with Back Button -->
+					<!-- Level 3 Header - Expanded State -->
 					<div class="group-data-[collapsible=icon]:hidden">
+						<!-- Top row: Collapse trigger and Search -->
 						<div class="flex items-center justify-between px-3 py-2 border-b border-sidebar-border">
 							<div class="flex items-center gap-3">
-								<button 
-									type="button" 
-									class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
-									onclick={hideLevel3}
-								>
-									<ArrowLeftIcon class="h-4 w-4" />
-								</button>
-								<span class="font-medium text-sidebar-foreground">{level3Navigation.title}</span>
+								<Sidebar.Trigger class="h-4 w-4 text-primary" />
+								<span class="font-medium text-sidebar-foreground">{level3Title}</span>
 							</div>
 							<button 
 								type="button" 
@@ -333,9 +421,18 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 							</button>
 						</div>
 						
-						<!-- Level 3 Breadcrumb -->
-						<div class="px-3 py-2 border-b border-sidebar-border">
-							<span class="text-xs text-muted-foreground">{level3Navigation.breadcrumb}</span>
+						<!-- Breadcrumb row: Back button and breadcrumb -->
+						<div class="flex items-center gap-3 px-3 py-2 border-b border-sidebar-border">
+							<button 
+								type="button" 
+								class="h-4 w-4 text-primary cursor-pointer"
+								onclick={hideLevel3}
+								title="Back to main menu"
+								aria-label="Back to main menu"
+							>
+								<ArrowLeftIcon class="h-4 w-4" />
+							</button>
+							<span class="text-xs text-muted-foreground">{level3Breadcrumb}</span>
 						</div>
 
 						<!-- Level 3 Search Bar -->
@@ -350,15 +447,9 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 						{/if}
 					</div>
 
-					<!-- Collapsed State Layout -->
+					<!-- Level 3 Header - Collapsed State -->
 					<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:border-b group-data-[collapsible=icon]:border-sidebar-border hidden">
-						<button 
-							type="button" 
-							class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
-							onclick={hideLevel3}
-						>
-							<ArrowLeftIcon class="h-6 w-6" />
-						</button>
+						<Sidebar.Trigger class="h-6 w-6 text-primary" />
 						<button 
 							type="button" 
 							class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
@@ -367,7 +458,6 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 							<SearchIcon class="h-4 w-4" />
 						</button>
 						
-						<!-- Collapsed Search Bar -->
 						{#if showSearchBar}
 							<div class="w-full">
 								<Input 
@@ -382,25 +472,112 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 
 				<!-- Level 3 Content -->
 				<Sidebar.Content class="p-3">
-					<Sidebar.Menu>
-						{#each level3Navigation.items as item}
-						<Sidebar.MenuItem>
-						<Sidebar.MenuButton
-						tooltipContent={item.label}
-						isActive={$page.url.pathname === item.href}
-						 class={$page.url.pathname === item.href ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''}
-						onclick={() => handleLevel3Click(item)}
-						>
-						{#if item.icon}
-						 {@const IconComponent = item.icon}
-						 <IconComponent />
-						 {/if}
-						  <span>{item.label}</span>
-						  </Sidebar.MenuButton>
-						</Sidebar.MenuItem>
-					{/each}
-					</Sidebar.Menu>
+					<!-- Expanded Menu -->
+					<div class="group-data-[collapsible=icon]:hidden">
+						<Sidebar.Menu>
+							{#each level3Items as item}
+								<Sidebar.MenuItem>
+									<button
+										type="button"
+										onclick={() => handleLevel3Click(item)}
+										class="flex w-full items-start gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-hover hover:text-sidebar-accent-foreground text-left {$page.url.pathname === item.href ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''}"
+									>
+										{#if item.icon}
+											{@const IconComponent = item.icon}
+											<IconComponent class="h-4 w-4 mt-0.5 flex-shrink-0 {$page.url.pathname === item.href ? 'text-white' : 'text-muted-foreground'}" />
+										{/if}
+										<span class="text-left leading-tight">{item.label}</span>
+									</button>
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+					</div>
+					
+					<!-- Collapsed Icon-Only Menu -->
+					<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 hidden">
+						{#each level3Items as item}
+							<button
+								type="button"
+								onclick={() => handleLevel3Click(item)}
+								class="h-8 w-8 rounded-md flex items-center justify-center transition-colors hover:bg-hover hover:text-sidebar-accent-foreground {$page.url.pathname === item.href ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''}"
+								title={item.label}
+							>
+								{#if item.icon}
+									{@const IconComponent = item.icon}
+									<IconComponent class="h-4 w-4 {$page.url.pathname === item.href ? 'text-white' : 'text-muted-foreground'}" />
+								{/if}
+							</button>
+						{/each}
+					</div>
 				</Sidebar.Content>
+
+				<!-- Level 3 Footer Section -->
+				{#if config.footer && config.footer.items.length > 0}
+					<Sidebar.Footer class="relative">
+						<div class="border-t border-sidebar-border"></div>
+						
+						<Sidebar.Menu>
+							{#each renderMenuSection(config.footer) as item}
+								<Sidebar.MenuItem>
+									{#if item.hasContextMenu}
+										<div class="relative settings-menu-container">
+											<Sidebar.MenuButton
+												tooltipContent={item.tooltipContent}
+												onclick={() => handleMenuClick(item)}
+												class="w-full"
+											>
+												{#if item.icon}
+													{@const IconComponent = item.icon}
+													<IconComponent />
+												{/if}
+												<span>{item.label}</span>
+											</Sidebar.MenuButton>
+											
+											{#if showSettingsMenu}
+												<div class="absolute left-full bottom-0 ml-2 w-64 bg-card border border-border rounded-lg shadow-lg p-2 z-50">
+													<div class="space-y-1">
+														{#each settingsContextMenu as contextItem}
+															<button
+																type="button"
+																class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-hover hover:text-accent-foreground focus:bg-hover focus:text-accent-foreground text-left"
+																onclick={() => handleContextMenuClick(contextItem)}
+															>
+																{#if contextItem.icon}
+																	{@const IconComponent = contextItem.icon}
+																	<IconComponent class="h-4 w-4 text-muted-foreground" />
+																{/if}
+																<span>{contextItem.label}</span>
+															</button>
+														{/each}
+													</div>
+												</div>
+											{/if}
+										</div>
+									{:else}
+										<Sidebar.MenuButton
+											tooltipContent={item.tooltipContent}
+											isActive={isMenuItemActive(item)}
+											onclick={() => handleMenuClick(item)}
+										>
+											{#if item.icon}
+												{@const IconComponent = item.icon}
+												<IconComponent />
+											{/if}
+											<span>{item.label}</span>
+										</Sidebar.MenuButton>
+									{/if}
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+						
+						<!-- Organization Switcher -->
+						<Sidebar.Menu>
+							<Sidebar.MenuItem>
+								<OrganizationSwitcher />
+							</Sidebar.MenuItem>
+						</Sidebar.Menu>
+					</Sidebar.Footer>
+				{/if}
 			</Sidebar.Root>
 
 			<!-- Main Content Area -->
@@ -411,282 +588,62 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 	{:else}
 		<!-- Main Navigation Sidebar -->
 		<Sidebar.Provider bind:open>
-		<Sidebar.Root {variant} {side} {collapsible}>
-	<!-- Header Section -->
-			<Sidebar.Header>
-				<!-- Menu Header with Search -->
-				<!-- Expanded State Layout -->
-				<div class="group-data-[collapsible=icon]:hidden">
-					<div class="flex items-center justify-between px-3 py-2 border-b border-sidebar-border">
-						<div class="flex items-center gap-3">
-							<Sidebar.Trigger class="h-4 w-4 text-primary" />
-							<span class="font-medium text-sidebar-foreground">Menu</span>
+			<Sidebar.Root {variant} {side} {collapsible}>
+				<!-- Header Section -->
+				<Sidebar.Header>
+					<!-- Expanded State Layout -->
+					<div class="group-data-[collapsible=icon]:hidden">
+						<div class="flex items-center justify-between px-3 py-2 border-b border-sidebar-border">
+							<div class="flex items-center gap-3">
+								<Sidebar.Trigger class="h-4 w-4 text-primary" />
+								<span class="font-medium text-sidebar-foreground">Menu</span>
+							</div>
+							<button 
+								type="button" 
+								class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
+								onclick={toggleSearchBar}
+							>
+								<SearchIcon class="h-4 w-4" />
+							</button>
 						</div>
+						
+						{#if showSearchBar}
+							<div class="px-3 py-2 border-b border-sidebar-border">
+								<Input 
+									bind:value={searchQuery}
+									placeholder="Search menu items..."
+									class="h-8 text-sm"
+								/>
+							</div>
+						{/if}
+					</div>
+
+					<!-- Collapsed State Layout -->
+					<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:border-b group-data-[collapsible=icon]:border-sidebar-border hidden">
+						<Sidebar.Trigger class="h-6 w-6 text-primary" />
 						<button 
-						type="button" 
-						class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
-						onclick={toggleSearchBar}
+							type="button" 
+							class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
+							onclick={toggleSearchBar}
 						>
 							<SearchIcon class="h-4 w-4" />
 						</button>
+						
+						{#if showSearchBar}
+							<div class="w-full">
+								<Input 
+									bind:value={searchQuery}
+									placeholder="Search..."
+									class="h-8 text-xs w-full"
+								/>
+							</div>
+						{/if}
 					</div>
-					
-					<!-- Collapsible Search Bar -->
-					{#if showSearchBar}
-						<div class="px-3 py-2 border-b border-sidebar-border">
-							<Input 
-								bind:value={searchQuery}
-								placeholder="Search menu items..."
-								class="h-8 text-sm"
-							/>
-						</div>
-					{/if}
-				</div>
 
-				<!-- Collapsed State Layout -->
-				<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:border-b group-data-[collapsible=icon]:border-sidebar-border hidden">
-					<Sidebar.Trigger class="h-6 w-6 text-primary" />
-					<button 
-						type="button" 
-						class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
-						onclick={toggleSearchBar}
-					>
-						<SearchIcon class="h-4 w-4" />
-					</button>
-					
-					<!-- Collapsed Search Bar -->
-					{#if showSearchBar}
-						<div class="w-full">
-							<Input 
-								bind:value={searchQuery}
-								placeholder="Search..."
-								class="h-8 text-xs w-full"
-							/>
-						</div>
-					{/if}
-				</div>
-
-			{#if config.header && config.header.items.length > 0}
-			 <Sidebar.Menu>
-			 {#each renderMenuSection(config.header) as item}
-			 <Sidebar.MenuItem>
-			  <Sidebar.MenuButton
-			  tooltipContent={item.tooltipContent}
-			  isActive={isMenuItemActive(item)}
-			  onclick={() => handleMenuClick(item)}
-			  class={cn(
-			  // Selected background: only if item itself is active
-			  isMenuItemActive(item) ? 'bg-selected text-white hover:bg-selected hover:text-white' : '',
-			  // Collapsed state: show selected background for parent with active child
-			  'group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-sidebar-foreground',
-			  item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem)) ? 'group-data-[collapsible=icon]:bg-selected group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:hover:bg-selected' : '',
-			  // Bold parent: only when expanded AND has active child AND menu is actually expanded
-			  item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem)) && expandedItems.has(item.label) ? 'font-semibold' : '',
-			  // Override: never bold in collapsed sidebar state
-			  'group-data-[collapsible=icon]:font-normal'
-			  )}
-			  >
-			  {#if item.icon}
-			   {@const IconComponent = item.icon}
-			   <IconComponent />
-			  {/if}
-			  <span>{item.label}</span>
-			  {#if item.hasNotification && item.notificationCount && item.subItems && item.subItems.length > 0}
-			  <!-- Notification badge + Chevron for expandable items -->
-			  <span class="ml-auto flex items-center gap-2">
-			   <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-			     {item.notificationCount}
-			   </span>
-			  <ChevronDownIcon 
-			    class="h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
-			    />
-						</span>
-					{:else if item.hasNotification && item.notificationCount}
-						<!-- Just notification badge for non-expandable items -->
-						<span class="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-							{item.notificationCount}
-						</span>
-					{:else if item.subItems && item.subItems.length > 0}
-						<!-- Just chevron for expandable items -->
-						<ChevronDownIcon 
-							class="ml-auto h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
-						/>
-					{/if}
-			</Sidebar.MenuButton>
-
-			{#if item.subItems && item.subItems.length > 0 && expandedItems.has(item.label)}
-			<Sidebar.MenuSub>
-			 {#each item.subItems as subItem}
-			   <Sidebar.MenuSubItem>
-			     {#if subItem.href}
-			       <Sidebar.MenuSubButton 
-			       href={subItem.hasLevel3 ? undefined : subItem.href}
-			       isActive={isSubMenuItemActive(subItem)}
-			       class={cn(
-			        isSubMenuItemActive(subItem) ? 'bg-selected text-white hover:bg-selected hover:text-white' : '',
-			         subItem.hasLevel3 ? 'flex justify-between items-center' : ''
-			       )}
-			        onclick={subItem.hasLevel3 ? () => handleSubMenuClick(subItem, item) : undefined}
-										>
-											<span>{subItem.label}</span>
-											{#if subItem.hasLevel3}
-												<ChevronRightIcon class="h-4 w-4 ml-auto text-muted-foreground" />
-											{/if}
-										</Sidebar.MenuSubButton>
-			        {:else}
-			      <button 
-			      type="button"
-			      class="text-sidebar-foreground ring-sidebar-ring hover:bg-hover hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground outline-hidden flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 whitespace-nowrap [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground text-sm group-data-[collapsible=icon]:hidden"
-			      onclick={() => handleSubMenuClick(subItem, item)}
-			      disabled={subItem.disabled}
-			      >
-			      {subItem.label}
-			      </button>
-			        {/if}
-			       </Sidebar.MenuSubItem>
-			      {/each}
-			     </Sidebar.MenuSub>
-			    {/if}
-			   </Sidebar.MenuItem>
-			   {/each}
-					</Sidebar.Menu>
-				{/if}
-			</Sidebar.Header>
-
-			<!-- Main Content Section -->
-			<Sidebar.Content class="p-3">
-				<Sidebar.Menu>
-					{#each renderMenuSection(config.content) as item}
-						<Sidebar.MenuItem>
-							<Sidebar.MenuButton
-							tooltipContent={item.tooltipContent}
-							isActive={isMenuItemActive(item)}
-							onclick={() => handleMenuClick(item)}
-							class={cn(
-							// Selected background: only if item itself is active
-							isMenuItemActive(item) ? 'bg-selected text-white hover:bg-selected hover:text-white' : '',
-							// Collapsed state: show selected background for parent with active child
-							'group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-sidebar-foreground',
-							item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem)) ? 'group-data-[collapsible=icon]:bg-selected group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:hover:bg-selected' : '',
-							// Bold parent: only when expanded AND has active child AND menu is actually expanded
-							item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem)) && expandedItems.has(item.label) ? 'font-semibold' : '',
-							 // Override: never bold in collapsed sidebar state
-							  'group-data-[collapsible=icon]:font-normal'
-							)}
-							>
-							{#if item.icon}
-							 {@const IconComponent = item.icon}
-							 <IconComponent />
-							{/if}
-							<span>{item.label}</span>
-							{#if item.hasNotification && item.notificationCount && item.subItems && item.subItems.length > 0}
-							<!-- Notification badge + Chevron for expandable items -->
-							<span class="ml-auto flex items-center gap-2">
-							 <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-							   {item.notificationCount}
-							 </span>
-							<ChevronDownIcon 
-							  class="h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
-							  />
-					</span>
-				{:else if item.hasNotification && item.notificationCount}
-					<!-- Just notification badge for non-expandable items -->
-					<span class="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-						{item.notificationCount}
-					</span>
-				{:else if item.subItems && item.subItems.length > 0}
-					<!-- Just chevron for expandable items -->
-					<ChevronDownIcon 
-						class="ml-auto h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
-					/>
-				{/if}
-			</Sidebar.MenuButton>
-
-							{#if item.subItems && item.subItems.length > 0 && expandedItems.has(item.label)}
-								<Sidebar.MenuSub>
-									{#each item.subItems as subItem}
-										<Sidebar.MenuSubItem>
-										{#if subItem.href}
-										<Sidebar.MenuSubButton 
-										href={subItem.hasLevel3 ? undefined : subItem.href}
-										isActive={isSubMenuItemActive(subItem)}
-										class={cn(
-										 isSubMenuItemActive(subItem) ? 'bg-selected text-white hover:bg-selected hover:text-white' : '',
-										  subItem.hasLevel3 ? 'flex justify-between items-center' : ''
-										)}
-										 onclick={subItem.hasLevel3 ? () => handleSubMenuClick(subItem, item) : undefined}
-							>
-								<span>{subItem.label}</span>
-								{#if subItem.hasLevel3}
-									<ChevronRightIcon class="h-4 w-4 ml-auto text-muted-foreground" />
-								{/if}
-							</Sidebar.MenuSubButton>
-										{:else}
-										<button 
-										type="button"
-										class="text-sidebar-foreground ring-sidebar-ring hover:bg-hover hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground outline-hidden flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 whitespace-nowrap [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground text-sm group-data-[collapsible=icon]:hidden"
-										onclick={() => handleSubMenuClick(subItem, item)}
-										disabled={subItem.disabled}
-										>
-										{subItem.label}
-										</button>
-										 {/if}
-									</Sidebar.MenuSubItem>
-									{/each}
-								</Sidebar.MenuSub>
-							{/if}
-						</Sidebar.MenuItem>
-					{/each}
-				</Sidebar.Menu>
-			</Sidebar.Content>
-
-			<!-- Footer Section -->
-			{#if config.footer && config.footer.items.length > 0}
-				<Sidebar.Footer class="relative">
-					<!-- Divider line above Settings -->
-					<div class="border-t border-sidebar-border"></div>
-					
-					<Sidebar.Menu>
-						{#each renderMenuSection(config.footer) as item}
-							<Sidebar.MenuItem>
-								{#if item.hasContextMenu}
-									<!-- Settings with Context Menu -->
-									<div class="relative settings-menu-container">
-									<Sidebar.MenuButton
-									tooltipContent={item.tooltipContent}
-									onclick={() => handleMenuClick(item)}
-									class="w-full"
-									>
-									{#if item.icon}
-									{@const IconComponent = item.icon}
-									<IconComponent />
-									{/if}
-									<span>{item.label}</span>
-									</Sidebar.MenuButton>
-									
-									<!-- Context Menu Dropdown -->
-									{#if showSettingsMenu}
-									<div class="absolute bottom-full right-0 mb-2 w-64 bg-card border border-border rounded-lg shadow-lg p-2 z-50">
-									<div class="space-y-1">
-									{#each settingsContextMenu as contextItem}
-									<button
-									type="button"
-									class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-hover hover:text-accent-foreground focus:bg-hover focus:text-accent-foreground text-left"
-									onclick={() => handleContextMenuClick(contextItem)}
-									>
-									{#if contextItem.icon}
-									{@const IconComponent = contextItem.icon}
-									<IconComponent class="h-4 w-4 text-muted-foreground" />
-									{/if}
-									<span>{contextItem.label}</span>
-									</button>
-									{/each}
-									</div>
-									</div>
-									{/if}
-									</div>
-								{:else}
-									<!-- Regular Menu Button -->
+					{#if config.header && config.header.items.length > 0}
+						<Sidebar.Menu>
+							{#each renderMenuSection(config.header) as item}
+								<Sidebar.MenuItem>
 									<Sidebar.MenuButton
 										tooltipContent={item.tooltipContent}
 										isActive={isMenuItemActive(item)}
@@ -698,18 +655,381 @@ import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 										{/if}
 										<span>{item.label}</span>
 									</Sidebar.MenuButton>
-								{/if}
-							</Sidebar.MenuItem>
-						{/each}
-					</Sidebar.Menu>
-				</Sidebar.Footer>
-			{/if}
-		</Sidebar.Root>
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+					{/if}
+				</Sidebar.Header>
 
-		<!-- Main Content Area -->
-		<div class="flex gap-4 bg-card border rounded-xl w-full p-4">
-			{@render children?.()}
-		</div>
-	</Sidebar.Provider>
+				<!-- Main Content Section -->
+				<Sidebar.Content class="p-3">
+					<!-- Expanded Menu -->
+					<div class="group-data-[collapsible=icon]:hidden">
+						<Sidebar.Menu>
+							{#each renderMenuSection(config.content) as item}
+								<Sidebar.MenuItem>
+									<Sidebar.MenuButton
+										tooltipContent={item.tooltipContent}
+										isActive={isMenuItemActive(item)}
+										onclick={() => handleMenuClick(item)}
+										class={cn(
+											isMenuItemActive(item) ? 'bg-selected text-white hover:bg-selected hover:text-white' : '',
+											'group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-sidebar-foreground',
+											item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem)) ? 'group-data-[collapsible=icon]:bg-selected group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:hover:bg-selected' : '',
+											(expandedItems.has(item.label) && item.subItems && item.subItems.length > 0) || (item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem))) ? 'font-semibold' : '',
+											'group-data-[collapsible=icon]:font-normal'
+										)}
+									>
+										{#if item.icon}
+											{@const IconComponent = item.icon}
+											<IconComponent />
+										{/if}
+										<span>{item.label}</span>
+										{#if item.hasNotification && item.notificationCount && item.subItems && item.subItems.length > 0}
+											<span class="ml-auto flex items-center gap-2">
+												<span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+													{item.notificationCount}
+												</span>
+												<ChevronDownIcon 
+													class="h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
+												/>
+											</span>
+										{:else if item.hasNotification && item.notificationCount}
+											<span class="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+												{item.notificationCount}
+											</span>
+										{:else if item.subItems && item.subItems.length > 0}
+											<ChevronDownIcon 
+												class="ml-auto h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
+											/>
+										{/if}
+									</Sidebar.MenuButton>
+
+									{#if item.subItems && item.subItems.length > 0 && expandedItems.has(item.label)}
+										<Sidebar.MenuSub>
+											{#each item.subItems as subItem}
+												<Sidebar.MenuSubItem>
+													{#if subItem.hasLevel3}
+														<button
+															type="button"
+															onclick={() => handleSubMenuClick(subItem, item)}
+															class="text-sidebar-foreground ring-sidebar-ring hover:bg-hover hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground outline-hidden flex h-7 w-full min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 whitespace-nowrap [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground text-sm group-data-[collapsible=icon]:hidden {isSubMenuItemActive(subItem) ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''} hover:[&>svg]:opacity-100"
+														>
+															<span class="truncate">{subItem.label}</span>
+															<ChevronRightIcon class="h-4 w-4 ml-auto text-muted-foreground opacity-0 transition-opacity duration-200 flex-shrink-0" />
+														</button>
+													{:else if subItem.href}
+														<Sidebar.MenuSubButton 
+															href={subItem.href}
+															isActive={isSubMenuItemActive(subItem)}
+															class={isSubMenuItemActive(subItem) ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''}
+														>
+															<span>{subItem.label}</span>
+														</Sidebar.MenuSubButton>
+													{:else}
+														<button 
+															type="button"
+															class="text-sidebar-foreground ring-sidebar-ring hover:bg-hover hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground outline-hidden flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 whitespace-nowrap [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground text-sm group-data-[collapsible=icon]:hidden"
+															onclick={() => handleSubMenuClick(subItem, item)}
+															disabled={subItem.disabled}
+														>
+															{subItem.label}
+														</button>
+													{/if}
+												</Sidebar.MenuSubItem>
+											{/each}
+										</Sidebar.MenuSub>
+									{/if}
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+					</div>
+					
+					<!-- Collapsed Icon-Only Menu -->
+					<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 hidden">
+						{#each renderMenuSection(config.content) as item}
+							<button
+								type="button"
+								onclick={() => handleMenuClick(item)}
+								class="h-8 w-8 rounded-md flex items-center justify-center transition-colors hover:bg-hover hover:text-sidebar-accent-foreground {isMenuItemActive(item) || (item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem))) ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''} relative"
+								title={item.label}
+							>
+								{#if item.icon}
+									{@const IconComponent = item.icon}
+									<IconComponent class="h-4 w-4 {isMenuItemActive(item) || (item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem))) ? 'text-white' : 'text-muted-foreground'}" />
+								{/if}
+								{#if item.hasNotification && item.notificationCount}
+									<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+										{item.notificationCount}
+									</span>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</Sidebar.Content>
+			</Sidebar.Root>
+
+			<!-- Main Content Area -->
+			<div class="flex gap-4 bg-card border rounded-xl w-full p-4">
+				{@render children?.()}
+			</div>
+		</Sidebar.Provider>
+	{:else}
+		<!-- Main Navigation Sidebar -->
+		<Sidebar.Provider bind:open>
+			<Sidebar.Root {variant} {side} {collapsible}>
+				<!-- Header Section -->
+				<Sidebar.Header>
+					<!-- Expanded State Layout -->
+					<div class="group-data-[collapsible=icon]:hidden">
+						<div class="flex items-center justify-between px-3 py-2 border-b border-sidebar-border">
+							<div class="flex items-center gap-3">
+								<Sidebar.Trigger class="h-4 w-4 text-primary" />
+								<span class="font-medium text-sidebar-foreground">Menu</span>
+							</div>
+							<button 
+								type="button" 
+								class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
+								onclick={toggleSearchBar}
+							>
+								<SearchIcon class="h-4 w-4" />
+							</button>
+						</div>
+						
+						{#if showSearchBar}
+							<div class="px-3 py-2 border-b border-sidebar-border">
+								<Input 
+									bind:value={searchQuery}
+									placeholder="Search menu items..."
+									class="h-8 text-sm"
+								/>
+							</div>
+						{/if}
+					</div>
+
+					<!-- Collapsed State Layout -->
+					<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:border-b group-data-[collapsible=icon]:border-sidebar-border hidden">
+						<Sidebar.Trigger class="h-6 w-6 text-primary" />
+						<button 
+							type="button" 
+							class="p-1 rounded-md hover:bg-hover hover:text-sidebar-accent-foreground transition-colors text-primary"
+							onclick={toggleSearchBar}
+						>
+							<SearchIcon class="h-4 w-4" />
+						</button>
+						
+						{#if showSearchBar}
+							<div class="w-full">
+								<Input 
+									bind:value={searchQuery}
+									placeholder="Search..."
+									class="h-8 text-xs w-full"
+								/>
+							</div>
+						{/if}
+					</div>
+
+					{#if config.header && config.header.items.length > 0}
+						<Sidebar.Menu>
+							{#each renderMenuSection(config.header) as item}
+								<Sidebar.MenuItem>
+									<Sidebar.MenuButton
+										tooltipContent={item.tooltipContent}
+										isActive={isMenuItemActive(item)}
+										onclick={() => handleMenuClick(item)}
+									>
+										{#if item.icon}
+											{@const IconComponent = item.icon}
+											<IconComponent />
+										{/if}
+										<span>{item.label}</span>
+									</Sidebar.MenuButton>
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+					{/if}
+				</Sidebar.Header>
+
+				<!-- Main Content Section -->
+				<Sidebar.Content class="p-3">
+					<!-- Expanded Menu -->
+					<div class="group-data-[collapsible=icon]:hidden">
+						<Sidebar.Menu>
+							{#each renderMenuSection(config.content) as item}
+								<Sidebar.MenuItem>
+									<Sidebar.MenuButton
+										tooltipContent={item.tooltipContent}
+										isActive={isMenuItemActive(item)}
+										onclick={() => handleMenuClick(item)}
+										class={cn(
+											isMenuItemActive(item) ? 'bg-selected text-white hover:bg-selected hover:text-white' : '',
+											'group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:text-sidebar-foreground',
+											item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem)) ? 'group-data-[collapsible=icon]:bg-selected group-data-[collapsible=icon]:text-white group-data-[collapsible=icon]:hover:bg-selected' : '',
+											(expandedItems.has(item.label) && item.subItems && item.subItems.length > 0) || (item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem))) ? 'font-semibold' : '',
+											'group-data-[collapsible=icon]:font-normal'
+										)}
+									>
+										{#if item.icon}
+											{@const IconComponent = item.icon}
+											<IconComponent />
+										{/if}
+										<span>{item.label}</span>
+										{#if item.hasNotification && item.notificationCount && item.subItems && item.subItems.length > 0}
+											<span class="ml-auto flex items-center gap-2">
+												<span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+													{item.notificationCount}
+												</span>
+												<ChevronDownIcon 
+													class="h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
+												/>
+											</span>
+										{:else if item.hasNotification && item.notificationCount}
+											<span class="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+												{item.notificationCount}
+											</span>
+										{:else if item.subItems && item.subItems.length > 0}
+											<ChevronDownIcon 
+												class="ml-auto h-4 w-4 transition-transform duration-200 {expandedItems.has(item.label) ? 'rotate-180' : 'rotate-0'}"
+											/>
+										{/if}
+									</Sidebar.MenuButton>
+
+									{#if item.subItems && item.subItems.length > 0 && expandedItems.has(item.label)}
+										<Sidebar.MenuSub>
+											{#each item.subItems as subItem}
+												<Sidebar.MenuSubItem>
+													{#if subItem.hasLevel3}
+														<button
+															type="button"
+															onclick={() => handleSubMenuClick(subItem, item)}
+															class="text-sidebar-foreground ring-sidebar-ring hover:bg-hover hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground outline-hidden flex h-7 w-full min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 whitespace-nowrap [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground text-sm group-data-[collapsible=icon]:hidden {isSubMenuItemActive(subItem) ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''} hover:[&>svg]:opacity-100"
+														>
+															<span class="truncate">{subItem.label}</span>
+															<ChevronRightIcon class="h-4 w-4 ml-auto text-muted-foreground opacity-0 transition-opacity duration-200 flex-shrink-0" />
+														</button>
+													{:else if subItem.href}
+														<Sidebar.MenuSubButton 
+															href={subItem.href}
+															isActive={isSubMenuItemActive(subItem)}
+															class={isSubMenuItemActive(subItem) ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''}
+														>
+															<span>{subItem.label}</span>
+														</Sidebar.MenuSubButton>
+													{:else}
+														<button 
+															type="button"
+															class="text-sidebar-foreground ring-sidebar-ring hover:bg-hover hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground outline-hidden flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 whitespace-nowrap [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground text-sm group-data-[collapsible=icon]:hidden"
+															onclick={() => handleSubMenuClick(subItem, item)}
+															disabled={subItem.disabled}
+														>
+															{subItem.label}
+														</button>
+													{/if}
+												</Sidebar.MenuSubItem>
+											{/each}
+										</Sidebar.MenuSub>
+									{/if}
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+					</div>
+					
+					<!-- Collapsed Icon-Only Menu -->
+					<div class="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2 hidden">
+						{#each renderMenuSection(config.content) as item}
+							<button
+								type="button"
+								onclick={() => handleMenuClick(item)}
+								class="h-8 w-8 rounded-md flex items-center justify-center transition-colors hover:bg-hover hover:text-sidebar-accent-foreground {isMenuItemActive(item) || (item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem))) ? 'bg-selected text-white hover:bg-selected hover:text-white' : ''} relative"
+								title={item.label}
+							>
+								{#if item.icon}
+									{@const IconComponent = item.icon}
+									<IconComponent class="h-4 w-4 {isMenuItemActive(item) || (item.subItems && item.subItems.some((subItem: any) => isSubMenuItemActive(subItem))) ? 'text-white' : 'text-muted-foreground'}" />
+								{/if}
+								{#if item.hasNotification && item.notificationCount}
+									<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+										{item.notificationCount}
+									</span>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</Sidebar.Content>
+
+				<!-- Footer Section -->
+				{#if config.footer && config.footer.items.length > 0}
+					<Sidebar.Footer class="relative">
+						<div class="border-t border-sidebar-border"></div>
+						
+						<Sidebar.Menu>
+							{#each renderMenuSection(config.footer) as item}
+								<Sidebar.MenuItem>
+									{#if item.hasContextMenu}
+										<div class="relative settings-menu-container">
+											<Sidebar.MenuButton
+												tooltipContent={item.tooltipContent}
+												onclick={() => handleMenuClick(item)}
+												class="w-full"
+											>
+												{#if item.icon}
+													{@const IconComponent = item.icon}
+													<IconComponent />
+												{/if}
+												<span>{item.label}</span>
+											</Sidebar.MenuButton>
+											
+											{#if showSettingsMenu}
+												<div class="absolute left-full bottom-0 ml-2 w-64 bg-card border border-border rounded-lg shadow-lg p-2 z-50">
+													<div class="space-y-1">
+														{#each settingsContextMenu as contextItem}
+															<button
+																type="button"
+																class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-hover hover:text-accent-foreground focus:bg-hover focus:text-accent-foreground text-left"
+																onclick={() => handleContextMenuClick(contextItem)}
+															>
+																{#if contextItem.icon}
+																	{@const IconComponent = contextItem.icon}
+																	<IconComponent class="h-4 w-4 text-muted-foreground" />
+																{/if}
+																<span>{contextItem.label}</span>
+															</button>
+														{/each}
+													</div>
+												</div>
+											{/if}
+										</div>
+									{:else}
+										<Sidebar.MenuButton
+											tooltipContent={item.tooltipContent}
+											isActive={isMenuItemActive(item)}
+											onclick={() => handleMenuClick(item)}
+										>
+											{#if item.icon}
+												{@const IconComponent = item.icon}
+												<IconComponent />
+											{/if}
+											<span>{item.label}</span>
+										</Sidebar.MenuButton>
+									{/if}
+								</Sidebar.MenuItem>
+							{/each}
+						</Sidebar.Menu>
+						
+						<!-- Organization Switcher -->
+						<Sidebar.Menu>
+							<Sidebar.MenuItem>
+								<OrganizationSwitcher />
+							</Sidebar.MenuItem>
+						</Sidebar.Menu>
+					</Sidebar.Footer>
+				{/if}
+			</Sidebar.Root>
+
+			<!-- Main Content Area -->
+			<div class="flex gap-4 bg-card border rounded-xl w-full p-4">
+				{@render children?.()}
+			</div>
+		</Sidebar.Provider>
 	{/if}
 </div>
