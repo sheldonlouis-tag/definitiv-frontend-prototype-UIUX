@@ -1,0 +1,8 @@
+node_modules/.bin
+.git
+.svelte-kit
+build
+stories
+tests
+*.md
+.storybook
