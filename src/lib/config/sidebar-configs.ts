@@ -176,6 +176,15 @@ export const adminCostCentersLevel3Menu = [
 ];
 
 /**
+ * Level 3 navigation data for Admin Payroll section
+ */
+export const adminPayrollLevel3Menu = [
+	{ label: 'Accrual Types', icon: ClockIcon3, href: '/admin/payroll/accrual-types' },
+	{ label: 'Pay Items', icon: CoinsIcon, href: '/admin/payroll/pay-items' },
+	{ label: 'Pay Calendars', icon: CalendarIcon, href: '/admin/payroll/pay-calendars' }
+];
+
+/**
  * Level 3 navigation data for Cost Centers section
  */
 export const costCentersLevel3Menu = [
@@ -239,7 +248,11 @@ export const sidebarConfig: SidebarConfig = {
 					{ label: 'Organisation', href: '/admin/organisation' },
 					{ label: 'Data Import/Export', href: '/admin/data-import-export' },
 					{ label: 'Time & Attendance', href: '/admin/time-attendance' },
-					{ label: 'Payroll', href: '/admin/payroll' },
+					{ 
+						label: 'Payroll', 
+						href: '/admin/payroll',
+						hasLevel3: true
+					},
 					{ label: 'Employment', href: '/admin/employment' },
 					{ label: 'Policies', href: '/admin/policies' },
 					{ label: 'Announcements', href: '/admin/announcements' }

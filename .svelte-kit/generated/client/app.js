@@ -20,27 +20,33 @@ export const nodes = [
 	() => import('./nodes/16'),
 	() => import('./nodes/17'),
 	() => import('./nodes/18'),
-	() => import('./nodes/19')
+	() => import('./nodes/19'),
+	() => import('./nodes/20'),
+	() => import('./nodes/21'),
+	() => import('./nodes/22')
 ];
 
 export const server_loads = [];
 
 export const dictionary = {
 		"/": [4],
-		"/employee/cost-centers": [6,[3]],
-		"/employee/cost-centers/projects": [7,[3]],
-		"/employee/details": [8,[3]],
-		"/employee/employee": [9,[3]],
-		"/employee/employee/my-details": [10,[3]],
-		"/employee/finance": [11,[3]],
-		"/employee/finance/banking": [12,[3]],
-		"/employee/financial": [13,[3]],
-		"/employee/financial/bank-accounts": [14,[3]],
-		"/employee/leave": [15,[3]],
-		"/my-team/employees": [16],
-		"/my-team/employees/[id]": [17],
-		"/my-team/onboarding": [18],
-		"/my-team/timesheets": [19],
+		"/admin/payroll": [6],
+		"/admin/payroll/accrual-types": [7],
+		"/admin/payroll/pay-items": [8],
+		"/employee/cost-centers": [9,[3]],
+		"/employee/cost-centers/projects": [10,[3]],
+		"/employee/details": [11,[3]],
+		"/employee/employee": [12,[3]],
+		"/employee/employee/my-details": [13,[3]],
+		"/employee/finance": [14,[3]],
+		"/employee/finance/banking": [15,[3]],
+		"/employee/financial": [16,[3]],
+		"/employee/financial/bank-accounts": [17,[3]],
+		"/employee/leave": [18,[3]],
+		"/my-team/employees": [19],
+		"/my-team/employees/[id]": [20],
+		"/my-team/onboarding": [21],
+		"/my-team/timesheets": [22],
 		"/(auth)/signin": [5,[2]]
 	};
 

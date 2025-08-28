@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-static';
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -8,20 +8,10 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: { 
 		adapter: adapter({
-			// Change output directory to match Netlify expectation
-			pages: 'dist',
-			assets: 'dist',
-			// Enable SPA fallback to handle all routes
-			fallback: 'index.html',
-			// Disable strict mode to allow dynamic routes
-			strict: false,
-			// Additional prerender options
-			precompress: false
+			runtime: 'nodejs20.x'
 		}),
-		// Configure prerender options
 		prerender: {
-			handleHttpError: 'warn',
-			handleMissingId: 'warn'
+			handleHttpError: 'warn'
 		}
 	}
 };

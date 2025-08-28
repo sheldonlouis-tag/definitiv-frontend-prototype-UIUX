@@ -5,6 +5,11 @@ type DynamicRoutes = {
 type Layouts = {
 	"/(auth)": undefined;
 	"/": { id?: string };
+	"/admin": undefined;
+	"/admin/payroll": undefined;
+	"/admin/payroll/accrual-types": undefined;
+	"/admin/payroll/pay-calendars": undefined;
+	"/admin/payroll/pay-items": undefined;
 	"/employee": undefined;
 	"/employee/cost-centers": undefined;
 	"/employee/cost-centers/projects": undefined;
@@ -24,13 +29,13 @@ type Layouts = {
 	"/(auth)/signin": undefined
 };
 
-export type RouteId = "/(auth)" | "/" | "/employee" | "/employee/cost-centers" | "/employee/cost-centers/projects" | "/employee/details" | "/employee/employee" | "/employee/employee/my-details" | "/employee/finance" | "/employee/finance/banking" | "/employee/financial" | "/employee/financial/bank-accounts" | "/employee/leave" | "/my-team" | "/my-team/employees" | "/my-team/employees/[id]" | "/my-team/onboarding" | "/my-team/timesheets" | "/(auth)/signin";
+export type RouteId = "/(auth)" | "/" | "/admin" | "/admin/payroll" | "/admin/payroll/accrual-types" | "/admin/payroll/pay-calendars" | "/admin/payroll/pay-items" | "/employee" | "/employee/cost-centers" | "/employee/cost-centers/projects" | "/employee/details" | "/employee/employee" | "/employee/employee/my-details" | "/employee/finance" | "/employee/finance/banking" | "/employee/financial" | "/employee/financial/bank-accounts" | "/employee/leave" | "/my-team" | "/my-team/employees" | "/my-team/employees/[id]" | "/my-team/onboarding" | "/my-team/timesheets" | "/(auth)/signin";
 
 export type RouteParams<T extends RouteId> = T extends keyof DynamicRoutes ? DynamicRoutes[T] : Record<string, never>;
 
 export type LayoutParams<T extends RouteId> = Layouts[T] | Record<string, never>;
 
-export type Pathname = "/" | "/employee" | "/employee/cost-centers" | "/employee/cost-centers/projects" | "/employee/details" | "/employee/employee" | "/employee/employee/my-details" | "/employee/finance" | "/employee/finance/banking" | "/employee/financial" | "/employee/financial/bank-accounts" | "/employee/leave" | "/my-team" | "/my-team/employees" | `/my-team/employees/${string}` & {} | "/my-team/onboarding" | "/my-team/timesheets" | "/signin";
+export type Pathname = "/" | "/admin" | "/admin/payroll" | "/admin/payroll/accrual-types" | "/admin/payroll/pay-calendars" | "/admin/payroll/pay-items" | "/employee" | "/employee/cost-centers" | "/employee/cost-centers/projects" | "/employee/details" | "/employee/employee" | "/employee/employee/my-details" | "/employee/finance" | "/employee/finance/banking" | "/employee/financial" | "/employee/financial/bank-accounts" | "/employee/leave" | "/my-team" | "/my-team/employees" | `/my-team/employees/${string}` & {} | "/my-team/onboarding" | "/my-team/timesheets" | "/signin";
 
 export type ResolvedPathname = `${"" | `/${string}`}${Pathname}`;
 

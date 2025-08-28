@@ -8,6 +8,15 @@
 		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
+	"/admin/payroll": [
+		"src/routes/+layout.ts"
+	],
+	"/admin/payroll/accrual-types": [
+		"src/routes/+layout.ts"
+	],
+	"/admin/payroll/pay-items": [
+		"src/routes/+layout.ts"
+	],
 	"/employee": [
 		"src/routes/employee/+layout.ts",
 		"src/routes/+layout.ts"

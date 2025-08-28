@@ -5,7 +5,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { OrganizationSwitcher, type Organization } from '$lib/components/ui/organization-switcher/index.js';
-	import { settingsContextMenu, employeeLevel3Menu, costCentersLevel3Menu, financialLevel3Menu, leaveLevel3Menu, reportingLevel3Menu, adminCostCentersLevel3Menu } from '$lib/config/sidebar-configs.js';
+	import { settingsContextMenu, employeeLevel3Menu, costCentersLevel3Menu, financialLevel3Menu, leaveLevel3Menu, reportingLevel3Menu, adminCostCentersLevel3Menu, adminPayrollLevel3Menu } from '$lib/config/sidebar-configs.js';
 	import { cn } from '$lib/utils.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -143,6 +143,8 @@
 			return { parentLabel: 'Employee Hub', itemLabel: 'Leave' };
 		} else if (cleanPath === '/admin/cost-centers' || cleanPath.startsWith('/admin/cost-centers/')) {
 			return { parentLabel: 'Admin', itemLabel: 'Cost Centers' };
+		} else if (cleanPath === '/admin/payroll' || cleanPath.startsWith('/admin/payroll/')) {
+			return { parentLabel: 'Admin', itemLabel: 'Payroll' };
 		} else if (cleanPath === '/reporting/employee-reporting' || cleanPath.startsWith('/reporting/employee-reporting/')) {
 			return { parentLabel: 'Reporting', itemLabel: 'Employee Reporting' };
 		} else if (cleanPath === '/reporting/payroll-reporting' || cleanPath.startsWith('/reporting/payroll-reporting/')) {
@@ -237,6 +239,11 @@
 					menuItems = costCentersLevel3Menu;
 					parentItem = { label: 'Cost Centers', href: '/employee/cost-centers', icon: BuildingIcon };
 				}
+				break;
+		case 'Payroll':
+				// Admin Payroll menu
+				menuItems = adminPayrollLevel3Menu;
+				parentItem = { label: 'Payroll', href: '/admin/payroll', icon: DollarSignIcon };
 				break;
 			case 'Financial':
 				menuItems = financialLevel3Menu;
