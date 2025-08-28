@@ -5,7 +5,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { OrganizationSwitcher, type Organization } from '$lib/components/ui/organization-switcher/index.js';
-	import { settingsContextMenu, employeeLevel3Menu, costCentersLevel3Menu, financialLevel3Menu, leaveLevel3Menu, reportingLevel3Menu, adminCostCentersLevel3Menu, adminPayrollLevel3Menu } from '$lib/config/sidebar-configs.js';
+	import { settingsContextMenu, employeeLevel3Menu, costCentersLevel3Menu, financialLevel3Menu, leaveLevel3Menu, reportingLevel3Menu, adminCostCentersLevel3Menu, adminPayrollLevel3Menu, adminOrganisationLevel3Menu, adminEmploymentLevel3Menu, adminPoliciesLevel3Menu } from '$lib/config/sidebar-configs.js';
 	import { cn } from '$lib/utils.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -16,6 +16,8 @@
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import UserIcon from '@lucide/svelte/icons/user';
 	import BuildingIcon from '@lucide/svelte/icons/building';
+	import BriefcaseIcon from '@lucide/svelte/icons/briefcase';
+	import FileTextIcon from '@lucide/svelte/icons/file-text';
 	import DollarSignIcon from '@lucide/svelte/icons/dollar-sign';
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
 	import TrendingUpIcon from '@lucide/svelte/icons/trending-up';
@@ -143,6 +145,12 @@
 			return { parentLabel: 'Employee Hub', itemLabel: 'Leave' };
 		} else if (cleanPath === '/admin/cost-centers' || cleanPath.startsWith('/admin/cost-centers/')) {
 			return { parentLabel: 'Admin', itemLabel: 'Cost Centers' };
+		} else if (cleanPath === '/admin/organisation' || cleanPath.startsWith('/admin/organisation/')) {
+			return { parentLabel: 'Admin', itemLabel: 'Organisation' };
+		} else if (cleanPath === '/admin/employment' || cleanPath.startsWith('/admin/employment/')) {
+			return { parentLabel: 'Admin', itemLabel: 'Employment' };
+		} else if (cleanPath === '/admin/policies' || cleanPath.startsWith('/admin/policies/')) {
+			return { parentLabel: 'Admin', itemLabel: 'Policies' };
 		} else if (cleanPath === '/admin/payroll' || cleanPath.startsWith('/admin/payroll/')) {
 			return { parentLabel: 'Admin', itemLabel: 'Payroll' };
 		} else if (cleanPath === '/reporting/employee-reporting' || cleanPath.startsWith('/reporting/employee-reporting/')) {
@@ -240,6 +248,18 @@
 					parentItem = { label: 'Cost Centers', href: '/employee/cost-centers', icon: BuildingIcon };
 				}
 				break;
+			case 'Organisation':
+				menuItems = adminOrganisationLevel3Menu;
+				parentItem = { label: 'Organisation', href: '/admin/organisation', icon: BuildingIcon };
+				break;
+			case 'Employment':
+				menuItems = adminEmploymentLevel3Menu;
+				parentItem = { label: 'Employment', href: '/admin/employment', icon: BriefcaseIcon };
+				break;
+			case 'Policies':
+				menuItems = adminPoliciesLevel3Menu;
+				parentItem = { label: 'Policies', href: '/admin/policies', icon: FileTextIcon };
+				break;
 		case 'Payroll':
 				// Admin Payroll menu
 				menuItems = adminPayrollLevel3Menu;
@@ -298,7 +318,7 @@
 			active: true,
 			title: itemLabel,
 			breadcrumb: parentLabel,
-			items: [parentItem, ...menuItems],
+			items: [...menuItems],
 			counter: Date.now()
 		});
 	}

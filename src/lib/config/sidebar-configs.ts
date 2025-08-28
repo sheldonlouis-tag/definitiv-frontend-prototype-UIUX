@@ -55,6 +55,19 @@ import DatabaseIcon from '@lucide/svelte/icons/database';
 import ClockIcon3 from '@lucide/svelte/icons/clock-3';
 import BriefcaseWorkIcon from '@lucide/svelte/icons/briefcase';
 import ScrollIcon from '@lucide/svelte/icons/scroll';
+import InfoIcon from '@lucide/svelte/icons/info';
+import SettingsIcon3 from '@lucide/svelte/icons/settings';
+import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
+import HomeIcon2 from '@lucide/svelte/icons/home';
+import BriefcaseBusinessIcon from '@lucide/svelte/icons/briefcase-business';
+import ShieldCheckIcon2 from '@lucide/svelte/icons/shield-check';
+import UserXIcon from '@lucide/svelte/icons/user-x';
+import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
+import DollarSignIcon2 from '@lucide/svelte/icons/dollar-sign';
+import PlaneIcon from '@lucide/svelte/icons/plane';
+import AwardIcon from '@lucide/svelte/icons/award';
+import PackageIcon from '@lucide/svelte/icons/package';
+import LockIcon from '@lucide/svelte/icons/lock';
 
 /**
  * Level 3 navigation data for Reporting section
@@ -166,6 +179,37 @@ export const financialLevel3Menu = [
 ];
 
 /**
+ * Level 3 navigation data for Admin Organisation section
+ */
+export const adminOrganisationLevel3Menu = [
+	{ label: 'Organisation Details', icon: InfoIcon, href: '/admin/organisation/organisation-details' },
+	{ label: 'Organisation Settings', icon: SettingsIcon3, href: '/admin/organisation/organisation-settings' },
+	{ label: 'Organisation Documents', icon: FolderOpenIcon, href: '/admin/organisation/organisation-documents' },
+	{ label: 'Usual Place of Residence', icon: HomeIcon2, href: '/admin/organisation/usual-place-of-residence' }
+];
+
+/**
+ * Level 3 navigation data for Admin Employment section
+ */
+export const adminEmploymentLevel3Menu = [
+	{ label: 'Employment Types', icon: BriefcaseBusinessIcon, href: '/admin/employment/employment-types' },
+	{ label: 'Compliance', icon: ShieldCheckIcon2, href: '/admin/employment/compliance' },
+	{ label: 'Termination Types', icon: UserXIcon, href: '/admin/employment/termination-types' },
+	{ label: 'Work Schedules', icon: CalendarClockIcon, href: '/admin/employment/work-schedules' }
+];
+
+/**
+ * Level 3 navigation data for Admin Policies section
+ */
+export const adminPoliciesLevel3Menu = [
+	{ label: 'Pay Policies', icon: DollarSignIcon2, href: '/admin/policies/pay-policies' },
+	{ label: 'Leave Policies', icon: PlaneIcon, href: '/admin/policies/leave-policies' },
+	{ label: 'Awards Policies', icon: AwardIcon, href: '/admin/policies/awards-policies' },
+	{ label: 'Provision Policies', icon: PackageIcon, href: '/admin/policies/provision-policies' },
+	{ label: 'Work Restrictions Policies', icon: LockIcon, href: '/admin/policies/work-restrictions-policies' }
+];
+
+/**
  * Level 3 navigation data for Admin Cost Centers section
  */
 export const adminCostCentersLevel3Menu = [
@@ -245,7 +289,7 @@ export const sidebarConfig: SidebarConfig = {
 						href: '/admin/cost-centers',
 						hasLevel3: true
 					},
-					{ label: 'Organisation', href: '/admin/organisation' },
+					{ label: 'Organisation', href: '/admin/organisation', hasLevel3: true },
 					{ label: 'Data Import/Export', href: '/admin/data-import-export' },
 					{ label: 'Time & Attendance', href: '/admin/time-attendance' },
 					{ 
@@ -253,8 +297,8 @@ export const sidebarConfig: SidebarConfig = {
 						href: '/admin/payroll',
 						hasLevel3: true
 					},
-					{ label: 'Employment', href: '/admin/employment' },
-					{ label: 'Policies', href: '/admin/policies' },
+					{ label: 'Employment', href: '/admin/employment', hasLevel3: true },
+					{ label: 'Policies', href: '/admin/policies', hasLevel3: true },
 					{ label: 'Announcements', href: '/admin/announcements' }
 				]
 			},
