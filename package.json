@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "npx vite build",
+		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "npx svelte-kit sync || echo ''",
 		"prepack": "svelte-kit sync && svelte-package && publint",
