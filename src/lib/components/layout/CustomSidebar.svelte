@@ -112,7 +112,7 @@
 		const newExpandedItems = new Set<string>();
 		
 		config.content?.items.forEach((item: any) => {
-			if (item.label === 'Employee Hub' || shouldExpandByDefault(item)) {
+			if (shouldExpandByDefault(item)) {
 				newExpandedItems.add(item.label);
 			}
 		});
@@ -123,8 +123,11 @@
 	// Function to toggle menu item expansion
 	function toggleExpansion(itemLabel: string) {
 		if (expandedItems.has(itemLabel)) {
+			// If clicking on already expanded item, collapse it
 			expandedItems.delete(itemLabel);
 		} else {
+			// If opening a new item, collapse all others and open this one
+			expandedItems.clear();
 			expandedItems.add(itemLabel);
 		}
 		expandedItems = new Set(expandedItems);
@@ -325,6 +328,10 @@
 
 	// Function to hide Level 3 navigation
 	async function hideLevel3() {
+		// Collapse all expanded menu items when returning to main navigation
+		expandedItems.clear();
+		expandedItems = new Set(expandedItems);
+		
 		level3Store.set({
 			active: false,
 			title: '',
@@ -424,7 +431,7 @@
 
 <svelte:window onclick={handleClickOutside} onkeydown={handleKeydown} />
 
-<div class={cn('flex p-2 gap-2', className)} {...restProps}>
+<div class={cn('flex p-2', className)} {...restProps}>
 	{#if isLevel3Active}
 		<!-- Level 3 Navigation Sidebar -->
 		<Sidebar.Provider bind:open>
@@ -608,7 +615,7 @@
 			</Sidebar.Root>
 
 			<!-- Main Content Area -->
-			<div class="flex gap-4 bg-card border rounded-xl w-full p-4">
+			<div class="bg-card border rounded-xl w-full p-4">
 				{@render children?.()}
 			</div>
 		</Sidebar.Provider>
@@ -797,8 +804,8 @@
 			</Sidebar.Root>
 
 			<!-- Main Content Area -->
-			<div class="flex gap-4 bg-card border rounded-xl w-full p-4">
-				{@render children?.()}
+			<div class="bg-card border rounded-xl w-full p-4">
+			{@render children?.()}
 			</div>
 		</Sidebar.Provider>
 	{:else}
